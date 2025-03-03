@@ -21,6 +21,8 @@ flags.DEFINE_boolean("verbose", False, "Run in verbose mode.")
 
 def main(argv):
     config, outdir = prepare(argv)
+    # the config and outdir are given on the terminal, typically config is a path to a yaml file (cellot.yaml, 4i.yaml)
+    # outdir is the directory where the results are saved
 
     if FLAGS.dry:
         print(outdir)
@@ -74,7 +76,7 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    if '--help' in sys.argv:
+    if "--help" in sys.argv:
         app.run(main)
     else:
         main(sys.argv)

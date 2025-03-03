@@ -84,6 +84,7 @@ def train_cellot(outdir, config):
     logger = Logger(outdir / "cache/scalars")
     cachedir = outdir / "cache"
     (f, g), opts, loader = load(config, restore=cachedir / "last.pt")
+
     iterator = cast_loader_to_iterator(loader, cycle_all=True)
 
     n_iters = config.training.n_iters
@@ -92,7 +93,7 @@ def train_cellot(outdir, config):
     minmmd = load_item_from_save(cachedir / "model.pt", "minmmd", np.inf)
     mmd = minmmd
 
-    if 'pair_batch_on' in config.training:
+    if "pair_batch_on" in config.training:
         keys = list(iterator.train.target.keys())
         test_keys = list(iterator.test.target.keys())
     else:
@@ -100,7 +101,7 @@ def train_cellot(outdir, config):
 
     ticker = trange(step, n_iters, initial=step, total=n_iters)
     for step in ticker:
-        if 'pair_batch_on' in config.training:
+        if "pair_batch_on" in config.training:
             assert keys is not None
             key = random.choice(keys)
             iterator_train_target = iterator.train.target[key]
@@ -123,6 +124,7 @@ def train_cellot(outdir, config):
 
         target = next(iterator_train_target)
         for _ in range(config.training.n_inner_iters):
+
             source = next(iterator_train_source).requires_grad_(True)
 
             opts.g.zero_grad()
@@ -142,10 +144,12 @@ def train_cellot(outdir, config):
         check_loss(gl, fl)
         f.clamp_w()
 
+        # tous les log_freq steps, on sauvegarde les aleurs des pertes gl et fl
         if step % config.training.logs_freq == 0:
             # log to logger object
             logger.log("train", gloss=gl.item(), floss=fl.item(), step=step)
 
+        # tous les eval_freq steps, on evalue le modele sur la base de test et si la MMD est plus petite on sauvegarde f et g
         if step % config.training.eval_freq == 0:
             mmd = evaluate()
             if mmd < minmmd:
@@ -154,7 +158,7 @@ def train_cellot(outdir, config):
                     state_dict(f, g, opts, step=step, minmmd=minmmd),
                     cachedir / "model.pt",
                 )
-
+        # Tous les cache_freq pas, on sauvegarde l’état courant du modèle
         if step % config.training.cache_freq == 0:
             torch.save(state_dict(f, g, opts, step=step), cachedir / "last.pt")
 
@@ -255,10 +259,12 @@ def train_popalign(outdir, config):
     def evaluate(config, data, model):
 
         # Get control and treated subset of the data and projections.
-        idx_control_test = np.where(data.obs[
-            config.data.condition] == config.data.source)[0]
-        idx_treated_test = np.where(data.obs[
-            config.data.condition] == config.data.target)[0]
+        idx_control_test = np.where(
+            data.obs[config.data.condition] == config.data.source
+        )[0]
+        idx_treated_test = np.where(
+            data.obs[config.data.condition] == config.data.target
+        )[0]
 
         predicted = transport_popalign(model, data[idx_control_test].X)
         target = np.array(data[idx_treated_test].X)
@@ -268,49 +274,54 @@ def train_popalign(outdir, config):
         wst = losses.wasserstein_loss(target, predicted)
 
         # Log to logger object.
-        logger.log(
-            "eval",
-            mmd=mmd,
-            wst=wst,
-            step=1
-        )
+        logger.log("eval", mmd=mmd, wst=wst, step=1)
 
     logger = Logger(outdir / "cache/scalars")
     cachedir = outdir / "cache"
 
     # Load dataset and previous model parameters.
-    model, _, dataset = load(config, restore=cachedir / "last.pt",
-                             return_as="dataset")
+    model, _, dataset = load(config, restore=cachedir / "last.pt", return_as="dataset")
     train_data = dataset["train"].adata
     test_data = dataset["test"].adata
 
     if not all(k in model for k in ("dim_red", "gmm_control", "response")):
 
-        if config.model.embedding == 'onmf':
+        if config.model.embedding == "onmf":
             # Find best low dimensional representation.
             q, nfeats, errors = onmf(train_data.X.T)
             W, proj = choose_featureset(
-                train_data.X.T, errors, q, nfeats, alpha=3, multiplier=3)
+                train_data.X.T, errors, q, nfeats, alpha=3, multiplier=3
+            )
 
         else:
             W = np.eye(train_data.X.shape[1])
             proj = train_data.X
 
         # Get control and treated subset of the data and projections.
-        idx_control_train = np.where(train_data.obs[
-            config.data.condition] == config.data.source)[0]
-        idx_treated_train = np.where(train_data.obs[
-            config.data.condition] == config.data.target)[0]
+        idx_control_train = np.where(
+            train_data.obs[config.data.condition] == config.data.source
+        )[0]
+        idx_treated_train = np.where(
+            train_data.obs[config.data.condition] == config.data.target
+        )[0]
 
         # Compute probabilistic model for control and treated population.
         gmm_control = build_gmm(
             train_data.X[idx_control_train, :].T,
-            proj[idx_control_train], ks=(3), niters=2,
-            training=.8, criteria='aic')
+            proj[idx_control_train],
+            ks=(3),
+            niters=2,
+            training=0.8,
+            criteria="aic",
+        )
         gmm_treated = build_gmm(
             train_data.X[idx_treated_train, :].T,
-            proj[idx_treated_train], ks=(3), niters=2,
-            training=.8, criteria='aic')
+            proj[idx_treated_train],
+            ks=(3),
+            niters=2,
+            training=0.8,
+            criteria="aic",
+        )
 
         # Compute alignment between components of both mixture models.
         align, _ = align_components(gmm_control, gmm_treated, method="ref2test")
@@ -319,13 +330,15 @@ def train_popalign(outdir, config):
         res = get_perturbation_response(align, gmm_control, gmm_treated)
 
         # Save all results to state dict.
-        model = {"dim_red": W,
-                 "gmm_control": gmm_control,
-                 "gmm_treated": gmm_treated,
-                 "response": res}
+        model = {
+            "dim_red": W,
+            "gmm_control": gmm_control,
+            "gmm_treated": gmm_treated,
+            "response": res,
+        }
         state_dict = model
-        pickle.dump(state_dict, open(cachedir / "last.pt", 'wb'))
-        pickle.dump(state_dict, open(cachedir / "model.pt", 'wb'))
+        pickle.dump(state_dict, open(cachedir / "last.pt", "wb"))
+        pickle.dump(state_dict, open(cachedir / "model.pt", "wb"))
 
     else:
         W = model["dim_red"]

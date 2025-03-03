@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "cellot",
+			"path": "."
+		},
+		{
+			"name": "datasets",
+			"path": "../../Desktop/datasets"
+		}
+	],
+	"settings": {}
+}

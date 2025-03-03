@@ -73,12 +73,13 @@ def read_single_anndata(config, path=None):
     transport_mapper = dict()
     for value in ["source", "target"]:
         key = config.data[value]
+        print(value, key)
         if isinstance(key, list):
             for item in key:
                 transport_mapper[item] = value
         else:
             transport_mapper[key] = value
-
+    print(transport_mapper)
     data.obs["transport"] = data.obs[config.data.condition].apply(transport_mapper.get)
 
     if config.data["target"] == "all":
@@ -194,8 +195,11 @@ def load_cell_data(
             if pair_batch_on is not None:
                 split_on.append(pair_batch_on)
 
-        elif (config.model.name == "scgen" or config.model.name == "cae"
-              or config.model.name == "popalign"):
+        elif (
+            config.model.name == "scgen"
+            or config.model.name == "cae"
+            or config.model.name == "popalign"
+        ):
             split_on = ["split"]
 
         else:
@@ -311,7 +315,6 @@ def split_cell_data_train_test_eval(
 
 
 def split_cell_data_toggle_ood(data, holdout, key, mode, random_state=0, **kwargs):
-
     """Hold out ood sample, coordinated with iid split
 
     ood sample defined with key, value pair
