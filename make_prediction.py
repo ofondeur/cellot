@@ -52,4 +52,4 @@ unstim_data_path = (
 output_path = (
     "/Users/MacBook/stanford/cellot/results/test_new/unseen_data_result/prediction.h5ad"
 )
-# predict_from_unstim_data(result_path, unstim_data_path, output_path)
+predict_from_unstim_data(result_path, unstim_data_path, output_path)
