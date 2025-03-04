@@ -45,11 +45,11 @@ def predict_from_unstim_data(result_path, unstim_data_path, output_path):
 
 
 # tests
-result_path = "/Users/MacBook/stanford/cellot/results/test_new/model-cellot"
+result_path = (
+    "/Users/MacBook/stanford/cellot/results/with_celltype/2marker/model-cellot/cache"
+)
 unstim_data_path = (
-    "/Users/MacBook/stanford/cellot/datasets/atest_data/unstim_Bcell_to_predict.h5ad"
+    "/Users/MacBook/stanford/cellot/datasets/atest_data/combined_Bcell3.h5ad"
 )
-output_path = (
-    "/Users/MacBook/stanford/cellot/results/test_new/unseen_data_result/prediction.h5ad"
-)
+output_path = "cellot/results/with_celltype/2marker/unsee_data/prediction.csv"
 predict_from_unstim_data(result_path, unstim_data_path, output_path)
