@@ -73,13 +73,11 @@ def read_single_anndata(config, path=None):
     transport_mapper = dict()
     for value in ["source", "target"]:
         key = config.data[value]
-        print(value, key)
         if isinstance(key, list):
             for item in key:
                 transport_mapper[item] = value
         else:
             transport_mapper[key] = value
-    print(transport_mapper)
     data.obs["transport"] = data.obs[config.data.condition].apply(transport_mapper.get)
 
     if config.data["target"] == "all":
