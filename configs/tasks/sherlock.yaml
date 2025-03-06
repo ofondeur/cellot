@@ -1,0 +1,15 @@
+data:
+  features: ./datasets/sherlock_training_data/features.txt
+  path: ./datasets/sherlock_training_data/combined_LPS.h5ad
+  condition: drug
+  source: Unstim
+  type: cell
+
+dataloader:
+  batch_size: 256
+  shuffle: true
+
+datasplit:
+  groupby: drug
+  name: train_test
+  test_size: 0.2
