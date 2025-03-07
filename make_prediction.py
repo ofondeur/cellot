@@ -20,6 +20,9 @@ def predict_from_unstim_data(result_path, unstim_data_path, output_path):
     unstim_anndata_to_predict = ad.read(unstim_data_path)
     features = read_list(config.data.features)
     unstim_anndata_to_predict = unstim_anndata_to_predict[:, features].copy()
+    unstim_anndata_to_predict = unstim_anndata_to_predict[
+        unstim_anndata_to_predict.obs["condition"] == "control"
+    ]
 
     # predict the data (first put it in the dataset format)
     dataset_args = {}
@@ -45,11 +48,7 @@ def predict_from_unstim_data(result_path, unstim_data_path, output_path):
 
 
 # tests
-result_path = (
-    "/Users/MacBook/stanford/cellot/results/with_celltype/2marker/model-cellot/cache"
-)
-unstim_data_path = (
-    "/Users/MacBook/stanford/cellot/datasets/atest_data/combined_Bcell3.h5ad"
-)
-output_path = "cellot/results/with_celltype/2marker/unsee_data/prediction.csv"
+result_path = "/Users/MacBook/stanford/cellot/results/test_1/model-cellot"
+unstim_data_path = "results/test_1/model-cellot/unseen_data/combined_LPS_HCAA.h5ad"
+output_path = "/Users/MacBook/stanford/cellot/results/test_1/model-cellot/unseen_data/prediction_HCAA.csv"
 predict_from_unstim_data(result_path, unstim_data_path, output_path)
