@@ -73,4 +73,6 @@ def plot_result(prediction_path, original_path, marker, outdir_path):
     }
 
     create_density_plots(dist_data, outdir_path, title_suffix="")
-    return dataf[["Stim True", "Stim Pred", "Unstim"]]
+    return dataf[
+        ["Stim True", "Stim Pred", "Unstim"]
+    ]  # return the data for further analysis
