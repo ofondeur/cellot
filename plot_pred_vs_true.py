@@ -76,13 +76,3 @@ def plot_result(prediction_path, original_path, marker, outdir_path):
 
     create_density_plots(dist_data, outdir_path, title_suffix="")
     return
-
-
-def count_files(directory, stimulation):
-    count = 0
-    sumsize = 0
-    for filename in os.listdir(directory):
-        if filename.endswith(".fcs") and stimulation in filename:
-            count += 1
-            sumsize += os.path.getsize(os.path.join(directory, filename))
-    return count, sumsize

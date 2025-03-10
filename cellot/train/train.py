@@ -86,7 +86,6 @@ def train_cellot(outdir, config):
     (f, g), opts, loader = load(config, restore=cachedir / "last.pt")
 
     iterator = cast_loader_to_iterator(loader, cycle_all=True)
-
     n_iters = config.training.n_iters
     step = load_item_from_save(cachedir / "last.pt", "step", 0)
 

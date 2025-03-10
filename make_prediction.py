@@ -20,6 +20,7 @@ def predict_from_unstim_data(
 
     # load the data to predict and filter with the interzsting markers
     unstim_anndata_to_predict = ad.read(unstim_data_path)
+
     features = read_list(config.data.features)
     unstim_anndata_to_predict = unstim_anndata_to_predict[:, features].copy()
     unstim_anndata_to_predict = unstim_anndata_to_predict[
