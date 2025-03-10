@@ -56,23 +56,33 @@ def create_density_plots(dist_data, out_file, title_suffix=""):
 def plot_result(prediction_path, original_path, marker, outdir_path):
     target = ad.read(original_path)
     target1 = target[:, marker].copy()
-    stim = pd.DataFrame(target1[target1.obs["condition"] == "stim"].X)
-    unstim = pd.DataFrame(target1[target1.obs["condition"] == "control"].X)
-
+    # stim = pd.DataFrame(target1[target1.obs["condition"] == "stim"].X)
+    # unstim = pd.DataFrame(target1[target1.obs["condition"] == "control"].X)
+    stim = pd.Series(
+        target1[target1.obs["condition"] == "stim"].X.flatten(), name="Stim True"
+    )
+    unstim = pd.Series(
+        target1[target1.obs["condition"] == "control"].X.flatten(), name="Unstim"
+    )
     dataf = pd.read_csv(prediction_path)
-    dataf["Stim Pred"] = dataf[marker]
-    dataf["Stim True"] = stim.iloc[:, 0]
-    dataf["Unstim"] = unstim.iloc[:, 0]
 
     dist_data = {
         "Patient_1": {
-            "Stim True": dataf["Stim True"].values,
+            "Stim True": stim.values,
             "Stim Pred": dataf["Stim Pred"].values,
-            "Unstim": dataf["Unstim"].values,
+            "Unstim": unstim.values,
         }
     }
 
     create_density_plots(dist_data, outdir_path, title_suffix="")
-    return dataf[
-        ["Stim True", "Stim Pred", "Unstim"]
-    ]  # return the data for further analysis
+    return
+
+
+def count_files(directory, stimulation):
+    count = 0
+    sumsize = 0
+    for filename in os.listdir(directory):
+        if filename.endswith(".fcs") and stimulation in filename:
+            count += 1
+            sumsize += os.path.getsize(os.path.join(directory, filename))
+    return count, sumsize

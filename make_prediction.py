@@ -7,7 +7,9 @@ from cellot.data.cell import AnnDataDataset
 from torch.utils.data import DataLoader
 
 
-def predict_from_unstim_data(result_path, unstim_data_path, output_path):
+def predict_from_unstim_data(
+    result_path, unstim_data_path, pred_format, output_path=None
+):
     config_path = os.path.join(result_path, "config.yaml")
     chkpt = os.path.join(result_path, "cache/model.pt")
 
@@ -38,17 +40,20 @@ def predict_from_unstim_data(result_path, unstim_data_path, output_path):
     )
 
     # save the prediction in the desired format
-    if output_path.endswith(".csv"):
-        prediction = predicted.to_df()
-        prediction.to_csv(output_path)
+    if pred_format == "csv":
+        predicted = predicted.to_df()
+        if output_path is not None:
+            predicted.to_csv(output_path)
+            return
 
-    elif output_path.endswith(".h5ad"):
+    elif pred_format == "h5ad" and output_path is not None:
         predicted.write(output_path)
-    return
+        return
+    return predicted
 
 
 # tests
-result_path = "/Users/MacBook/stanford/cellot/results/test_1/model-cellot"
-unstim_data_path = "results/test_1/model-cellot/unseen_data/combined_LPS_HCAA.h5ad"
-output_path = "/Users/MacBook/stanford/cellot/results/test_1/model-cellot/unseen_data/prediction_HCAA.csv"
-predict_from_unstim_data(result_path, unstim_data_path, output_path)
+result_path = "results/LPS_cMC/model-cellot"
+unstim_data_path = "results/LPS_cMC/model-cellot/unseen_data/combined_LPS_cMC_HCAA.h5ad"
+output_path = "/Users/MacBook/stanford/cellot/results/LPS_cMC/model-cellot/unseen_data/prediction_HCAA2.csv"
+ada = predict_from_unstim_data(result_path, unstim_data_path, "h5ad")
