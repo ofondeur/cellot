@@ -56,8 +56,6 @@ def create_density_plots(dist_data, out_file, title_suffix=""):
 def plot_result(prediction_path, original_path, marker, outdir_path):
     target = ad.read(original_path)
     target1 = target[:, marker].copy()
-    # stim = pd.DataFrame(target1[target1.obs["condition"] == "stim"].X)
-    # unstim = pd.DataFrame(target1[target1.obs["condition"] == "control"].X)
     stim = pd.Series(
         target1[target1.obs["condition"] == "stim"].X.flatten(), name="Stim True"
     )
